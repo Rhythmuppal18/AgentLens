@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #090b0a;
+  --surface: #111512;
+  --surface-2: #171c19;
+  --surface-3: #1c221e;
+  --border: #252d28;
+  --border-light: #303a33;
+  --text: #f5f7f5;
+  --muted: #9ba69e;
+  --dim: #88948a;
+  --lime: #b8f56a;
+  --cyan: #6bc8c1;
+  --red: #f06f68;
+  --amber: #e5ad55;
+  --green: #67c98a;
+
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #080908;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 80px 80px;
+  color: #f5f7f5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom dark scrollbars matching the Figma obsidian/lime styling */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #090b0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1c221e;
+  border-radius: 3px;
+  border: 1px solid #252d28;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #303a33;
+}
+
+@keyframes viewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.view-transition {
+  animation: viewFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
