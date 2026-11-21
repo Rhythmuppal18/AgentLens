@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"
 
+    # SLA Latency Thresholds Configuration (in milliseconds)
+    AGENTLENS_SLA_LLM_MS: int = 10000
+    AGENTLENS_SLA_TOOL_MS: int = 5000
+    AGENTLENS_SLA_RETRIEVAL_MS: int = 2000
+    AGENTLENS_SLA_AGENT_STEP_MS: int = 15000
+
     @property
     def async_database_url(self) -> str:
         """Returns normalized asyncpg database connection string."""
