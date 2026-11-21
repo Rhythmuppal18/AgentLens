@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GitFork, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useApp } from '../../context/useApp';
+import { fetchTraces } from '../../services/api';
+import type { Trace } from '../../types';
 
 interface ExecutionRow {
   id: string;
   agent: string;
   rootSpan: string;
-  status: 'SUCCESS' | 'ERROR' | 'PARTIAL';
+  status: 'SUCCESS' | 'ERROR' | 'PARTIAL' | string;
   spansCount: number;
   durationMs: number;
+  isLive?: boolean;
 }
 
 const SAMPLE_REFERENCE_RUNS: ExecutionRow[] = [
@@ -19,6 +22,7 @@ const SAMPLE_REFERENCE_RUNS: ExecutionRow[] = [
     status: 'ERROR',
     spansCount: 9,
     durationMs: 3420,
+    isLive: false,
   },
   {
     id: 'trc_0012_demo',
@@ -27,6 +31,7 @@ const SAMPLE_REFERENCE_RUNS: ExecutionRow[] = [
     status: 'PARTIAL',
     spansCount: 7,
     durationMs: 4180,
+    isLive: false,
   },
   {
     id: 'trc_3b8a1c90',
@@ -35,15 +40,56 @@ const SAMPLE_REFERENCE_RUNS: ExecutionRow[] = [
     status: 'SUCCESS',
     spansCount: 4,
     durationMs: 820,
+    isLive: false,
   },
 ];
 
 export const RecentTracesTable: React.FC = () => {
-  const { setActiveTab } = useApp();
-  // By default, stay truthful to zero live executions
+  const { currentProject, environment, setActiveTab } = useApp();
+  const [liveTraces, setLiveTraces] = useState<Trace[]>([]);
   const [showSampleRuns, setShowSampleRuns] = useState(false);
 
-  const runs = showSampleRuns ? SAMPLE_REFERENCE_RUNS : [];
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadRecentTraces() {
+      try {
+        const res = await fetchTraces({
+          project_id: currentProject?.id,
+          environment,
+          limit: 8,
+        });
+        if (isMounted) {
+          setLiveTraces(res.items);
+        }
+      } catch {
+        // Fall back gracefully
+      }
+    }
+
+    loadRecentTraces();
+    const interval = setInterval(loadRecentTraces, 10000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [currentProject?.id, environment]);
+
+  const hasLiveTraces = liveTraces.length > 0;
+
+  const displayRows: ExecutionRow[] = hasLiveTraces
+    ? liveTraces.map((t) => ({
+        id: t.id,
+        agent: t.agentName,
+        rootSpan: t.rootSpanName,
+        status: t.status === 'FAILED' ? 'ERROR' : t.status,
+        spansCount: t.spanCount,
+        durationMs: t.durationMs,
+        isLive: true,
+      }))
+    : showSampleRuns
+    ? SAMPLE_REFERENCE_RUNS
+    : [];
 
   return (
     <div className="p-3.5 sm:p-4 rounded-md bg-[#0c0e0d] border border-[#252d28] space-y-2.5 [content-visibility:auto] [contain-intrinsic-size:0_280px]">
@@ -53,7 +99,11 @@ export const RecentTracesTable: React.FC = () => {
           <h2 className="text-xs font-semibold text-[#f5f7f5] font-mono uppercase tracking-wider">
             Recent Executions
           </h2>
-          {showSampleRuns ? (
+          {hasLiveTraces ? (
+            <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded-xs bg-[#b8f56a]/15 text-[#b8f56a] border border-[#b8f56a]/30 font-semibold">
+              Live ({liveTraces.length})
+            </span>
+          ) : showSampleRuns ? (
             <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded-xs bg-[#e5ad55]/15 text-[#e5ad55] border border-[#e5ad55]/30 font-semibold">
               Sample Data (3)
             </span>
@@ -65,23 +115,25 @@ export const RecentTracesTable: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowSampleRuns(!showSampleRuns)}
-            className="text-[10px] font-mono text-[#88948a] hover:text-[#f5f7f5] flex items-center gap-1 transition-colors cursor-pointer"
-            title="Toggle between live telemetry empty state and reference sample traces"
-          >
-            {showSampleRuns ? (
-              <>
-                <EyeOff className="h-3 w-3 text-[#e5ad55]" />
-                <span className="text-[#e5ad55]">Hide Sample Data</span>
-              </>
-            ) : (
-              <>
-                <Eye className="h-3 w-3 text-[#88948a]" />
-                <span>Preview Sample Data</span>
-              </>
-            )}
-          </button>
+          {!hasLiveTraces && (
+            <button
+              onClick={() => setShowSampleRuns(!showSampleRuns)}
+              className="text-[10px] font-mono text-[#88948a] hover:text-[#f5f7f5] flex items-center gap-1 transition-colors cursor-pointer"
+              title="Toggle between live telemetry empty state and reference sample traces"
+            >
+              {showSampleRuns ? (
+                <>
+                  <EyeOff className="h-3 w-3 text-[#e5ad55]" />
+                  <span className="text-[#e5ad55]">Hide Sample Data</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="h-3 w-3 text-[#88948a]" />
+                  <span>Preview Sample Data</span>
+                </>
+              )}
+            </button>
+          )}
 
           <button
             onClick={() => setActiveTab('traces')}
@@ -94,7 +146,7 @@ export const RecentTracesTable: React.FC = () => {
       </div>
 
       {/* Discrepancy Clarification Banner When Sample Data Is Visible */}
-      {showSampleRuns && (
+      {!hasLiveTraces && showSampleRuns && (
         <div className="px-2.5 py-1.5 bg-[#17140e] border border-[#e5ad55]/30 rounded-xs flex items-center justify-between text-[10px] font-mono text-[#e5ad55]">
           <span className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-[#e5ad55]" />
@@ -110,7 +162,7 @@ export const RecentTracesTable: React.FC = () => {
       )}
 
       {/* Table or Empty State */}
-      {runs.length > 0 ? (
+      {displayRows.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
             <thead>
@@ -124,7 +176,7 @@ export const RecentTracesTable: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1c221e]">
-              {runs.map((r) => (
+              {displayRows.map((r) => (
                 <tr
                   key={r.id}
                   onClick={() => setActiveTab('traces')}
@@ -132,20 +184,22 @@ export const RecentTracesTable: React.FC = () => {
                 >
                   <td className="py-2 text-[#b8f56a] font-medium group-hover:underline">
                     <div className="flex items-center gap-1.5">
-                      <span>{r.id}</span>
-                      <span className="text-[8px] font-mono uppercase px-1 py-0.2 rounded-xs bg-[#1a1710] text-[#e5ad55] border border-[#e5ad55]/20">
-                        Demo
-                      </span>
+                      <span className="truncate max-w-[120px]">{r.id}</span>
+                      {!r.isLive && (
+                        <span className="text-[8px] font-mono uppercase px-1 py-0.2 rounded-xs bg-[#1a1710] text-[#e5ad55] border border-[#e5ad55]/20">
+                          Demo
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td className="py-2 text-[#9ba69e]">{r.agent}</td>
-                  <td className="py-2 text-[#f5f7f5]">{r.rootSpan}</td>
+                  <td className="py-2 text-[#f5f7f5] truncate max-w-[140px]">{r.rootSpan}</td>
                   <td className="py-2">
                     <span
                       className={`text-[9px] font-mono px-1.5 py-0.2 rounded-xs border uppercase font-medium ${
-                        r.status === 'SUCCESS'
+                        r.status === 'SUCCESS' || r.status === 'OK'
                           ? 'bg-[#67c98a]/10 text-[#67c98a] border-[#67c98a]/30'
-                          : r.status === 'ERROR'
+                          : r.status === 'ERROR' || r.status === 'FAILED'
                           ? 'bg-[#f06f68]/10 text-[#f06f68] border-[#f06f68]/30'
                           : 'bg-[#e5ad55]/10 text-[#e5ad55] border-[#e5ad55]/30'
                       }`}

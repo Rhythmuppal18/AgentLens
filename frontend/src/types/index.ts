@@ -5,11 +5,21 @@ export type NavigationTab =
   | 'analytics'
   | 'settings';
 
-export type Environment = 'production' | 'staging' | 'development';
+export type Environment = 'production' | 'staging' | 'development' | string;
 export type DateRange = '1h' | '24h' | '7d' | '30d' | 'custom';
 
 export interface Project {
   id: string;
+  name: string;
+  slug: string;
+  createdAt: string;
+  apiKey?: string;
+  apiKeyPrefix?: string;
+}
+
+export interface EnvironmentInfo {
+  id: string;
+  projectId: string;
   name: string;
   slug: string;
   createdAt: string;
@@ -35,9 +45,10 @@ export type SpanType =
   | 'LLM_CALL'
   | 'TOOL_CALL'
   | 'RETRIEVAL'
-  | 'ROUTING';
+  | 'ROUTING'
+  | string;
 
-export type SpanStatus = 'OK' | 'ERROR' | 'RUNNING';
+export type SpanStatus = 'OK' | 'ERROR' | 'RUNNING' | string;
 
 export interface SpanEvent {
   timestamp: string;
@@ -77,9 +88,11 @@ export interface Span {
 
 export interface Trace {
   id: string;
+  projectId?: string;
+  environmentId?: string;
   agentName: string;
-  sessionId: string;
-  status: 'SUCCESS' | 'FAILED' | 'RUNNING';
+  sessionId: string | null;
+  status: 'SUCCESS' | 'FAILED' | 'RUNNING' | string;
   startTime: string;
   endTime: string | null;
   durationMs: number;
@@ -87,6 +100,7 @@ export interface Trace {
   costUsd: number;
   rootSpanName: string;
   spanCount: number;
+  hasFailures?: boolean;
   spans: Span[];
 }
 
@@ -106,6 +120,8 @@ export interface FailureRuleDefinition {
   condition: string;
   status: 'standby' | 'active';
   severity: FailureSeverity;
+  count?: number;
+  activeThresholdMs?: number | null;
 }
 
 export interface FailureViolation {
@@ -118,4 +134,48 @@ export interface FailureViolation {
   timestamp: string;
   evidenceSummary: string;
   evidenceData: Record<string, unknown>;
+  fingerprint?: string;
+}
+
+export interface AnalyticsOverview {
+  totalExecutions: number;
+  failedExecutions: number;
+  errorRate: number;
+  p95LatencyMs: number | null;
+  avgDurationMs: number | null;
+  totalTokens: number;
+  estimatedCostUsd: number;
+  isTelemetryStandby: boolean;
+}
+
+export interface ActivityDataPoint {
+  time: string;
+  total: number;
+  failed: number;
+  success: number;
+}
+
+export interface RuleMetric {
+  id: FailureRuleType;
+  name: string;
+  description: string;
+  condition: string;
+  severity: FailureSeverity;
+  count: number;
+  activeThresholdMs?: number | null;
+}
+
+export interface AgentMetric {
+  agentName: string;
+  executions: number;
+  errorRate: number;
+  avgDurationMs: number;
+  totalTokens: number;
+}
+
+export interface ToolMetric {
+  toolName: string;
+  calls: number;
+  errorRate: number;
+  avgDurationMs: number;
 }

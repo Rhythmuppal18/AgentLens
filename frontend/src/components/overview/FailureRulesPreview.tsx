@@ -53,13 +53,13 @@ const FAILURE_RULES: FailureRuleDefinition[] = [
   },
 ];
 
-const SEVERITY_BADGES = {
+const SEVERITY_BADGES: Record<string, string> = {
   CRITICAL: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
   HIGH: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
   WARNING: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/30',
 };
 
-const RULE_ICONS = {
+const RULE_ICONS: Record<string, React.ElementType> = {
   FAILED_SPAN: XCircle,
   REPEATED_TOOL_CALL: Repeat,
   EXCESSIVE_RETRIES: RotateCcw,

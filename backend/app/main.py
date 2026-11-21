@@ -6,7 +6,13 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.v1.analytics import router as analytics_router
+from app.api.v1.environments import router as environments_router
+from app.api.v1.failures import router as failures_router
+from app.api.v1.projects import router as projects_router
+from app.api.v1.spans import router as spans_router
 from app.api.v1.telemetry import router as telemetry_router
+from app.api.v1.traces import router as traces_router
 from app.core.database import close_db_engine
 from app.core.gzip_middleware import GzipRequestMiddleware
 
@@ -98,6 +104,12 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 # Routers
 app.include_router(telemetry_router, prefix="/api/v1/telemetry")
+app.include_router(projects_router, prefix="/api/v1/projects")
+app.include_router(environments_router, prefix="/api/v1/environments")
+app.include_router(traces_router, prefix="/api/v1/traces")
+app.include_router(spans_router, prefix="/api/v1/spans")
+app.include_router(failures_router, prefix="/api/v1/failures")
+app.include_router(analytics_router, prefix="/api/v1/analytics")
 
 
 @app.get("/")

@@ -19,6 +19,7 @@ export interface AppContextType {
   setDateRange: (range: DateRange) => void;
   connectionState: BackendConnectionState;
   refreshHealth: () => Promise<void>;
+  refreshProjects: () => Promise<void>;
   isMobileNavOpen: boolean;
   setIsMobileNavOpen: (open: boolean) => void;
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AlertTriangle,
   Repeat,
@@ -8,6 +8,8 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useApp } from '../../context/useApp';
+import { fetchAnalyticsRules } from '../../services/api';
+import type { RuleMetric } from '../../types';
 
 interface RuleCard {
   id: string;
@@ -62,7 +64,38 @@ const RULES: RuleCard[] = [
 ];
 
 export const DeterministicRulesGrid: React.FC = () => {
-  const { setActiveTab } = useApp();
+  const { currentProject, environment, dateRange, setActiveTab } = useApp();
+  const [ruleMetrics, setRuleMetrics] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadRules() {
+      try {
+        const data: RuleMetric[] = await fetchAnalyticsRules({
+          project_id: currentProject?.id,
+          environment,
+          time_range: dateRange,
+        });
+        if (isMounted) {
+          const counts: Record<string, number> = {};
+          data.forEach((r) => {
+            counts[r.id] = r.count;
+          });
+          setRuleMetrics(counts);
+        }
+      } catch {
+        // Fall back gracefully
+      }
+    }
+
+    loadRules();
+    const interval = setInterval(loadRules, 10000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [currentProject?.id, environment, dateRange]);
 
   return (
     <div className="space-y-2.5 pt-1 [content-visibility:auto] [contain-intrinsic-size:0_320px]">
@@ -89,6 +122,7 @@ export const DeterministicRulesGrid: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 border border-[#252d28] bg-[#0c0e0d] divide-y sm:divide-y-0 sm:divide-x divide-[#252d28] rounded-md overflow-hidden">
         {RULES.map((rule) => {
           const Icon = rule.icon;
+          const count = ruleMetrics[rule.id] ?? 0;
           return (
             <div
               key={rule.id}
@@ -98,7 +132,14 @@ export const DeterministicRulesGrid: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between text-xs font-mono text-[#88948a]">
                   <Icon className="h-3.5 w-3.5 text-[#9ba69e] group-hover:text-[#b8f56a] transition-colors" />
-                  <span className="text-[10px] text-[#88948a] font-mono">{rule.index}</span>
+                  <div className="flex items-center gap-1.5">
+                    {count > 0 && (
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-xs bg-[#f06f68]/15 text-[#f06f68] border border-[#f06f68]/30 font-semibold">
+                        {count} violations
+                      </span>
+                    )}
+                    <span className="text-[10px] text-[#88948a] font-mono">{rule.index}</span>
+                  </div>
                 </div>
 
                 <h3 className="text-xs font-semibold text-[#f5f7f5] font-mono mt-1.5 group-hover:text-[#b8f56a] transition-colors">
