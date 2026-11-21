@@ -5,7 +5,8 @@ import {
   ArrowUpRight,
   AlertTriangle,
   GitFork,
-  FileCode
+  FileCode,
+  Sparkles
 } from 'lucide-react';
 import type { FailureViolation } from '../../types';
 import { ModalDrawer } from '../common/ModalDrawer';
@@ -15,12 +16,14 @@ interface EvidenceDrawerProps {
   violation: FailureViolation | null;
   isOpen: boolean;
   onClose: () => void;
+  onOpenDiagnosis?: (violation: FailureViolation) => void;
 }
 
 export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
   violation,
   isOpen,
   onClose,
+  onOpenDiagnosis,
 }) => {
   const { setActiveTab } = useApp();
   const [copied, setCopied] = useState(false);
@@ -44,6 +47,20 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
       badge={violation.severity}
       width="max-w-2xl"
     >
+      {/* AI Diagnostician Quick Action Banner */}
+      {onOpenDiagnosis && (
+        <button
+          onClick={() => {
+            onClose();
+            onOpenDiagnosis(violation);
+          }}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[linear-gradient(90deg,rgba(184,245,106,0.18)_0%,rgba(17,21,18,0.95)_70%,transparent)] hover:bg-[#b8f56a]/25 border border-[#b8f56a]/50 text-[#b8f56a] font-mono text-xs font-bold transition-all cursor-pointer shadow-md shadow-[#b8f56a]/5"
+        >
+          <Sparkles className="h-4 w-4" />
+          <span>✨ Run AI Root-Cause Diagnostician & Get Prompt Fix</span>
+        </button>
+      )}
+
       {/* Evidence Summary Alert */}
       <div className="p-4 rounded-xl bg-[linear-gradient(90deg,rgba(229,173,85,0.08)_0%,rgba(17,21,18,0.9)_70%,transparent)] border border-[#e5ad55]/30 space-y-2">
         <div className="flex items-center gap-2 text-[#e5ad55] font-mono text-xs font-semibold">

@@ -4,10 +4,12 @@ import {
   CheckCircle2,
   FileText,
   Eye,
-  EyeOff
+  EyeOff,
+  Sparkles
 } from 'lucide-react';
 import type { FailureRuleDefinition, FailureViolation, RuleMetric } from '../../types';
 import { EvidenceDrawer } from './EvidenceDrawer';
+import { AiDiagnosisModal } from './AiDiagnosisModal';
 import { EmptyState } from '../common/EmptyState';
 import { useApp } from '../../context/useApp';
 import { fetchFailures, fetchAnalyticsRules } from '../../services/api';
@@ -101,6 +103,8 @@ export const FailureDetectionView: React.FC = () => {
   const [showReferenceViolations, setShowReferenceViolations] = useState(false);
   const [selectedViolation, setSelectedViolation] = useState<FailureViolation | null>(null);
   const [isEvidenceOpen, setIsEvidenceOpen] = useState(false);
+  const [diagnoseViolation, setDiagnoseViolation] = useState<FailureViolation | null>(null);
+  const [isDiagnosisOpen, setIsDiagnosisOpen] = useState(false);
   const [selectedSeverity, setSelectedSeverity] = useState<string>('ALL');
 
   const [liveFindings, setLiveFindings] = useState<FailureViolation[]>([]);
@@ -332,11 +336,23 @@ export const FailureDetectionView: React.FC = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
+                          setDiagnoseViolation(violation);
+                          setIsDiagnosisOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#b8f56a]/15 hover:bg-[#b8f56a]/25 border border-[#b8f56a]/40 text-[#b8f56a] text-[11px] font-semibold transition-all cursor-pointer mr-2 shadow-xs"
+                        title="Run AI root-cause diagnosis and get prompt fix"
+                      >
+                        <Sparkles className="h-3 w-3" />
+                        <span>AI Diagnosis</span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
                           handleInspectEvidence(violation);
                         }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#b8f56a]/10 hover:bg-[#b8f56a]/20 border border-[#b8f56a]/30 text-[#b8f56a] text-[11px] transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#171c19] hover:bg-[#1f2622] border border-[#252d28] hover:border-[#b8f56a]/30 text-[#f5f7f5] text-[11px] transition-colors cursor-pointer"
                       >
-                        <FileText className="h-3 w-3" />
+                        <FileText className="h-3 w-3 text-[#929b94]" />
                         <span>Inspect Evidence</span>
                       </button>
                     </td>
@@ -365,6 +381,17 @@ export const FailureDetectionView: React.FC = () => {
         violation={selectedViolation}
         isOpen={isEvidenceOpen}
         onClose={() => setIsEvidenceOpen(false)}
+        onOpenDiagnosis={(v) => {
+          setDiagnoseViolation(v);
+          setIsDiagnosisOpen(true);
+        }}
+      />
+
+      {/* AI Root-Cause Diagnosis Modal */}
+      <AiDiagnosisModal
+        violation={diagnoseViolation}
+        isOpen={isDiagnosisOpen}
+        onClose={() => setIsDiagnosisOpen(false)}
       />
     </div>
   );
