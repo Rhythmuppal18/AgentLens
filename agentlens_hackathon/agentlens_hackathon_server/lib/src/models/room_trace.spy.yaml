@@ -1,0 +1,17 @@
+class: RoomTrace
+table: room_trace
+fields:
+  roomId: int, relation(parent=debug_room, onDelete=Cascade)
+  roomCode: String
+  traceId: String
+  agentName: String
+  status: String
+  durationMs: int
+  totalTokens: int, default=0
+  startTime: DateTime
+  endTime: DateTime?
+  isSample: bool, default=false
+indexes:
+  room_trace_room_trace_idx:
+    fields: roomCode, traceId
+    unique: true

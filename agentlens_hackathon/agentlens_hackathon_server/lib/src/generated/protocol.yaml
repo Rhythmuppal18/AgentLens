@@ -1,0 +1,30 @@
+emailIdp:
+  - startOtpLogin:
+  - verifyOtpLoginCode:
+  - finishOtpLogin:
+  - finishOtpRegistration:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+  - hasAccount:
+jwtRefresh:
+  - refreshAccessToken:
+investigation:
+  - addNote:
+room:
+  - createRoom:
+  - joinRoom:
+  - getRoomSnapshot:
+  - heartbeat:
+  - leaveRoom:
+roomStream:
+  - watchRoom:
+telemetry:
+  - ingestTrace:
+  - simulateAgentTrace:
+greeting:
+  - hello:

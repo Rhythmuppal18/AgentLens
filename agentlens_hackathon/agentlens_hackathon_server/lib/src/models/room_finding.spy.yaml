@@ -1,0 +1,20 @@
+class: RoomFinding
+table: room_finding
+fields:
+  roomId: int, relation(parent=debug_room, onDelete=Cascade)
+  roomCode: String
+  traceId: String
+  spanId: String?
+  spanName: String?
+  ruleType: String
+  severity: String
+  summary: String
+  evidenceSummary: String
+  evidenceDataJson: String?
+  detectedAt: DateTime
+  isSample: bool, default=false
+indexes:
+  room_finding_room_code_idx:
+    fields: roomCode
+  room_finding_trace_idx:
+    fields: roomCode, traceId

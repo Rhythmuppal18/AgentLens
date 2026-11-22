@@ -1,0 +1,25 @@
+class: RoomSpan
+table: room_span
+fields:
+  roomId: int, relation(parent=debug_room, onDelete=Cascade)
+  roomCode: String
+  traceId: String
+  spanId: String
+  parentSpanId: String?
+  name: String
+  spanType: String
+  status: String
+  durationMs: int
+  inputPayloadJson: String?
+  outputPayloadJson: String?
+  errorMessage: String?
+  errorType: String?
+  errorStack: String?
+  startTime: DateTime
+  endTime: DateTime?
+indexes:
+  room_span_room_span_idx:
+    fields: roomCode, spanId
+    unique: true
+  room_span_trace_idx:
+    fields: roomCode, traceId

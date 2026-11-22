@@ -1,0 +1,16 @@
+class: DebugRoom
+table: debug_room
+fields:
+  roomCode: String
+  name: String
+  createdBy: String
+  ingestTokenHash: String
+  createdAt: DateTime
+  currentSequenceNumber: int, default=0
+  isActive: bool, default=true
+indexes:
+  debug_room_code_unique_idx:
+    fields: roomCode
+    unique: true
+  debug_room_ingest_token_idx:
+    fields: ingestTokenHash
