@@ -16,17 +16,41 @@ import type {
   Trace,
 } from '../types';
 
-const PRIMARY_HEALTH_URL = 'http://localhost:8000/health';
+const getHealthUrl = (): string => {
+  const envUrl = (import.meta as any).env?.VITE_API_URL;
+  if (envUrl) {
+    return `${envUrl.replace(/\/+$/, '')}/health`;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return '/health';
+  }
+  return 'http://localhost:8000/health';
+};
+
+const PRIMARY_HEALTH_URL = getHealthUrl();
 const FALLBACK_HEALTH_URL = '/health';
 
 const getApiBaseUrl = (): string => {
+  const envUrl = (import.meta as any).env?.VITE_API_URL;
+  if (envUrl) {
+    return `${envUrl.replace(/\/+$/, '')}/api/v1`;
+  }
   if (typeof window !== 'undefined' && window.location.origin) {
     return '/api/v1';
   }
   return 'http://localhost:8000/api/v1';
 };
 
-const getDirectApiBaseUrl = (): string => 'http://localhost:8000/api/v1';
+const getDirectApiBaseUrl = (): string => {
+  const envUrl = (import.meta as any).env?.VITE_API_URL;
+  if (envUrl) {
+    return `${envUrl.replace(/\/+$/, '')}/api/v1`;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return '/api/v1';
+  }
+  return 'http://localhost:8000/api/v1';
+};
 
 async function requestJson<T>(path: string, options: RequestInit = {}): Promise<T> {
   const relativeBase = getApiBaseUrl();
