@@ -68,7 +68,7 @@ async def get_analytics_overview(
             func.sum(Trace.estimated_cost_usd).label("total_cost"),
             func.max(Trace.start_time).label("last_telemetry_at"),
         )
-        .join(Environment, Trace.environment_id == Environment.id)
+        .outerjoin(Environment, Trace.environment_id == Environment.id)
     )
 
     if project_id is not None:
@@ -105,7 +105,7 @@ async def get_analytics_overview(
             select(
                 func.percentile_cont(0.95).within_group(Trace.duration_ms)
             )
-            .join(Environment, Trace.environment_id == Environment.id)
+            .outerjoin(Environment, Trace.environment_id == Environment.id)
             .where(Trace.duration_ms.isnot(None))
         )
         if project_id is not None:
@@ -193,7 +193,7 @@ async def get_analytics_activity(
     # Query matching traces
     query = (
         select(Trace.start_time, Trace.status, Trace.has_failures)
-        .join(Environment, Trace.environment_id == Environment.id)
+        .outerjoin(Environment, Trace.environment_id == Environment.id)
         .where(Trace.start_time >= start)
     )
     if project_id is not None:
@@ -334,7 +334,7 @@ async def get_analytics_performance(
             func.avg(Trace.duration_ms).label("avg_duration"),
             func.sum(Trace.total_tokens).label("total_tokens"),
         )
-        .join(Environment, Trace.environment_id == Environment.id)
+        .outerjoin(Environment, Trace.environment_id == Environment.id)
         .group_by(Trace.agent_name)
     )
 

@@ -3,6 +3,7 @@ export type NavigationTab =
   | 'traces'
   | 'failures'
   | 'analytics'
+  | 'ml-playground'
   | 'settings';
 
 export type Environment = 'production' | 'staging' | 'development' | string;

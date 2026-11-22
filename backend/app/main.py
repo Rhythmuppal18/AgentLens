@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from app.api.v1.analytics import router as analytics_router
 from app.api.v1.environments import router as environments_router
 from app.api.v1.failures import router as failures_router
+from app.api.v1.ml import router as ml_router
 from app.api.v1.projects import router as projects_router
 from app.api.v1.spans import router as spans_router
 from app.api.v1.telemetry import router as telemetry_router
@@ -110,6 +111,7 @@ app.include_router(traces_router, prefix="/api/v1/traces")
 app.include_router(spans_router, prefix="/api/v1/spans")
 app.include_router(failures_router, prefix="/api/v1/failures")
 app.include_router(analytics_router, prefix="/api/v1/analytics")
+app.include_router(ml_router, prefix="/api/v1/ml")
 
 
 @app.get("/")

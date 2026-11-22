@@ -109,10 +109,20 @@ export const AnalyticsView: React.FC = () => {
     ? `${((1 - totalToolErrors / totalToolCalls) * 100).toFixed(1)}%`
     : '100.0%';
 
-  const ruleChartData = ruleMetrics.map((r) => ({
-    rule: r.name.replace(' Call', '').replace(' Result', ''),
-    count: r.count,
-  }));
+  const defaultRules = [
+    { rule: 'Failed Span', count: 0 },
+    { rule: 'Repeated Tool', count: 0 },
+    { rule: 'Excessive Retries', count: 0 },
+    { rule: 'Slow Span', count: 0 },
+    { rule: 'Empty Tool', count: 0 },
+  ];
+
+  const ruleChartData = ruleMetrics.length > 0
+    ? ruleMetrics.map((r) => ({
+        rule: r.name.replace(' Call', '').replace(' Result', ''),
+        count: r.count,
+      }))
+    : defaultRules;
 
   return (
     <div className="space-y-4 animate-in fade-in duration-150">
@@ -206,7 +216,7 @@ export const AnalyticsView: React.FC = () => {
           </div>
 
           <div className="relative h-48 w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={180} minWidth={0} minHeight={180}>
               <AreaChart data={activityData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1c221e" vertical={false} />
                 <XAxis dataKey="time" stroke="#626b64" fontSize={10} tickLine={false} fontFamily="monospace" />
@@ -239,7 +249,7 @@ export const AnalyticsView: React.FC = () => {
           </div>
 
           <div className="relative h-48 w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={180} minWidth={0} minHeight={180}>
               <BarChart data={ruleChartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1c221e" vertical={false} />
                 <XAxis dataKey="rule" stroke="#626b64" fontSize={9} tickLine={false} fontFamily="monospace" />

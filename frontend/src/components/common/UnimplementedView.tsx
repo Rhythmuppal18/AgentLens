@@ -66,6 +66,19 @@ const VIEW_CONFIG: Record<Exclude<NavigationTab, 'overview'>, ViewDetails> = {
     ],
     techSpec: 'Powered by Recharts and PostgreSQL time-bucketed aggregations (GET /api/v1/analytics/summary).',
   },
+  'ml-playground': {
+    title: 'Machine Learning Observability Playground',
+    stage: 'Production Live',
+    icon: GitFork,
+    summary: 'Interactive Scikit-learn Iris classifier training, live inference tracing, and automated 5-rule failure detection.',
+    plannedFeatures: [
+      'Real-time model training with live evaluation metrics and confusion matrix',
+      'Single-sample flower classification with probability distribution',
+      'Continuous trace and span generation through AgentLens Python SDK',
+      '5-rule automated failure detection diagnostics with evidence inspection',
+    ],
+    techSpec: 'Integrates Scikit-learn Random Forest classifier with FastAPI /api/v1/ml endpoints and React UI.',
+  },
   'settings': {
     title: 'Platform & Environment Settings',
     stage: 'Milestone Stage 2',

@@ -211,35 +211,47 @@ interface RawOverview {
 }
 
 interface RawActivityItem {
-  time: string;
-  total: number;
-  failed: number;
-  success: number;
+  time?: string;
+  timestamp?: string;
+  total?: number;
+  executions?: number;
+  failed?: number;
+  errors?: number;
+  success?: number;
 }
 
 interface RawRuleItem {
-  id: FailureRuleType;
+  id?: FailureRuleType;
+  rule_type?: FailureRuleType;
   name: string;
-  description: string;
-  condition: string;
-  severity: FailureSeverity;
+  description?: string;
+  condition?: string;
+  severity?: FailureSeverity;
   count?: number;
+  violations_count?: number;
   active_threshold_ms?: number | null;
+  configured_thresholds_ms?: Record<string, number>;
 }
 
 interface RawAgentMetric {
   agent_name: string;
-  executions: number;
+  executions?: number;
+  total_executions?: number;
+  failed_executions?: number;
   error_rate: number;
-  avg_duration_ms: number;
+  avg_duration_ms?: number;
+  average_duration_ms?: number;
   total_tokens: number;
 }
 
 interface RawToolMetric {
   tool_name: string;
-  calls: number;
+  calls?: number;
+  total_calls?: number;
+  failed_calls?: number;
   error_rate: number;
-  avg_duration_ms: number;
+  avg_duration_ms?: number;
+  average_duration_ms?: number;
 }
 
 interface RawPerformanceResponse {
@@ -622,14 +634,15 @@ export async function fetchAnalyticsActivity(
   if (params.time_range) query.set('time_range', params.time_range);
 
   const qs = query.toString();
-  const raw = await requestJson<{ items?: RawActivityItem[] }>(`/analytics/activity${qs ? `?${qs}` : ''}`);
-  const items = Array.isArray(raw.items) ? raw.items : [];
-  return items.map((pt) => ({
-    time: pt.time,
-    total: pt.total,
-    failed: pt.failed,
-    success: pt.success,
-  }));
+  const raw = await requestJson<{ data_points?: RawActivityItem[]; items?: RawActivityItem[] }>(`/analytics/activity${qs ? `?${qs}` : ''}`);
+  const items = Array.isArray(raw.data_points) ? raw.data_points : Array.isArray(raw.items) ? raw.items : [];
+  return items.map((pt) => {
+    const time = pt.timestamp || pt.time || '';
+    const total = pt.executions ?? pt.total ?? 0;
+    const failed = pt.errors ?? pt.failed ?? 0;
+    const success = Math.max(0, total - failed);
+    return { time, total, failed, success };
+  });
 }
 
 export async function fetchAnalyticsRules(
@@ -641,17 +654,22 @@ export async function fetchAnalyticsRules(
   if (params.time_range) query.set('time_range', params.time_range);
 
   const qs = query.toString();
-  const raw = await requestJson<{ items?: RawRuleItem[] }>(`/analytics/rules${qs ? `?${qs}` : ''}`);
-  const items = Array.isArray(raw.items) ? raw.items : [];
-  return items.map((r) => ({
-    id: r.id,
-    name: r.name,
-    description: r.description,
-    condition: r.condition,
-    severity: r.severity,
-    count: r.count ?? 0,
-    activeThresholdMs: r.active_threshold_ms ?? null,
-  }));
+  const raw = await requestJson<{ rules?: RawRuleItem[]; items?: RawRuleItem[] }>(`/analytics/rules${qs ? `?${qs}` : ''}`);
+  const items = Array.isArray(raw.rules) ? raw.rules : Array.isArray(raw.items) ? raw.items : [];
+  return items.map((r) => {
+    const id = (r.rule_type || r.id || 'FAILED_SPAN') as any;
+    const count = r.violations_count ?? r.count ?? 0;
+    const severity = (r.severity || 'WARNING') as any;
+    return {
+      id,
+      name: r.name || id,
+      description: r.description || '',
+      condition: r.condition || '',
+      severity,
+      count,
+      activeThresholdMs: r.configured_thresholds_ms?.TOOL_CALL ?? r.active_threshold_ms ?? null,
+    };
+  });
 }
 
 export async function fetchAnalyticsPerformance(
@@ -666,17 +684,115 @@ export async function fetchAnalyticsPerformance(
   const raw = await requestJson<RawPerformanceResponse>(`/analytics/performance${qs ? `?${qs}` : ''}`);
   return {
     agents: (raw.agents || []).map((a) => ({
-      agentName: a.agent_name,
-      executions: a.executions,
-      errorRate: a.error_rate,
-      avgDurationMs: a.avg_duration_ms,
-      totalTokens: a.total_tokens,
+      agentName: a.agent_name || 'Agent',
+      executions: a.total_executions ?? a.executions ?? 0,
+      errorRate: a.error_rate ?? 0,
+      avgDurationMs: a.average_duration_ms ?? a.avg_duration_ms ?? 0,
+      totalTokens: a.total_tokens ?? 0,
     })),
     tools: (raw.tools || []).map((t) => ({
-      toolName: t.tool_name,
-      calls: t.calls,
-      errorRate: t.error_rate,
-      avgDurationMs: t.avg_duration_ms,
+      toolName: t.tool_name || 'Tool',
+      calls: t.total_calls ?? t.calls ?? 0,
+      errorRate: t.error_rate ?? 0,
+      avgDurationMs: t.average_duration_ms ?? t.avg_duration_ms ?? 0,
     })),
   };
+}
+
+// ----------------------------------------------------------------------
+// ML Playground API
+// ----------------------------------------------------------------------
+
+export interface MlDatasetInfo {
+  name: string;
+  total_samples: number;
+  features_count: number;
+  classes_count: number;
+  train_samples: number;
+  test_samples: number;
+}
+
+export interface MlFeatureImportance {
+  feature: string;
+  importance: number;
+}
+
+export interface MlModelMetrics {
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1_score: number;
+  test_samples: number;
+  duration_ms: number;
+}
+
+export interface MlModelInfoResponse {
+  status: string;
+  dataset: MlDatasetInfo;
+  feature_names: string[];
+  target_names: string[];
+  metrics: MlModelMetrics;
+  confusion_matrix: number[][];
+  feature_importances: MlFeatureImportance[];
+  trace_id: string;
+}
+
+export interface MlPredictRequest {
+  sepal_length: number;
+  sepal_width: number;
+  petal_length: number;
+  petal_width: number;
+}
+
+export interface MlPredictResponse {
+  predicted_class: string;
+  confidence: number;
+  probabilities: Record<string, number>;
+  latency_ms: number;
+  trace_id: string;
+  input: Record<string, number>;
+}
+
+export interface MlDiagnosticFinding {
+  id?: string;
+  rule_type: string;
+  severity: string;
+  summary: string;
+  evidence_summary?: string;
+  evidence_data?: Record<string, unknown>;
+}
+
+export interface MlDiagnosticResponse {
+  scenario: string;
+  rule_type: string;
+  trace_id: string;
+  expected_severity: string;
+  detected: boolean;
+  description: string;
+  finding?: MlDiagnosticFinding;
+}
+
+export async function fetchMlModelInfo(): Promise<MlModelInfoResponse> {
+  return await requestJson<MlModelInfoResponse>('/ml/model-info');
+}
+
+export async function trainMlModel(params: { n_estimators?: number; random_state?: number } = {}): Promise<MlModelInfoResponse> {
+  return await requestJson<MlModelInfoResponse>('/ml/train', {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+}
+
+export async function predictMlSample(payload: MlPredictRequest): Promise<MlPredictResponse> {
+  return await requestJson<MlPredictResponse>('/ml/predict', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function runMlDiagnostic(rule_type: string): Promise<MlDiagnosticResponse> {
+  return await requestJson<MlDiagnosticResponse>('/ml/diagnostic', {
+    method: 'POST',
+    body: JSON.stringify({ rule_type }),
+  });
 }

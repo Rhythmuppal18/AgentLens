@@ -4,6 +4,7 @@ import {
   GitFork,
   ShieldAlert,
   BarChart3,
+  FlaskConical,
   Settings,
   ExternalLink,
   BookOpen,
@@ -43,6 +44,12 @@ const NAV_ITEMS: NavItemConfig[] = [
     id: 'analytics',
     label: 'Analytics',
     icon: BarChart3,
+  },
+  {
+    id: 'ml-playground',
+    label: 'ML Playground',
+    icon: FlaskConical,
+    badge: 'Live',
   },
   {
     id: 'settings',

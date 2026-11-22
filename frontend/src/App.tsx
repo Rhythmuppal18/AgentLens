@@ -8,6 +8,7 @@ import { OverviewView } from './components/overview/OverviewView';
 const TraceExplorerView = lazy(() => import('./components/traces/TraceExplorerView').then((m) => ({ default: m.TraceExplorerView })));
 const FailureDetectionView = lazy(() => import('./components/failures/FailureDetectionView').then((m) => ({ default: m.FailureDetectionView })));
 const AnalyticsView = lazy(() => import('./components/analytics/AnalyticsView').then((m) => ({ default: m.AnalyticsView })));
+const MLPlaygroundView = lazy(() => import('./components/ml/MLPlaygroundView').then((m) => ({ default: m.MLPlaygroundView })));
 const SettingsView = lazy(() => import('./components/settings/SettingsView').then((m) => ({ default: m.SettingsView })));
 
 function AppContent() {
@@ -31,6 +32,7 @@ function AppContent() {
               {activeTab === 'traces' && <TraceExplorerView />}
               {activeTab === 'failures' && <FailureDetectionView />}
               {activeTab === 'analytics' && <AnalyticsView />}
+              {activeTab === 'ml-playground' && <MLPlaygroundView />}
               {activeTab === 'settings' && <SettingsView />}
             </Suspense>
           </div>
