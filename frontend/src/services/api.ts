@@ -20,7 +20,8 @@ const getEnvBaseUrl = (): string | undefined => {
   const metaEnv = (import.meta as any).env;
   if (metaEnv?.BACKEND_URL) return metaEnv.BACKEND_URL;
   if (metaEnv?.VITE_API_URL) return metaEnv.VITE_API_URL;
-  if (typeof process !== 'undefined' && process.env?.BACKEND_URL) return process.env.BACKEND_URL;
+  const proc = (globalThis as any).process;
+  if (proc?.env?.BACKEND_URL) return proc.env.BACKEND_URL;
   return undefined;
 };
 
