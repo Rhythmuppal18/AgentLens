@@ -22,15 +22,13 @@ from app.core.database import get_db_session
 from app.models.finding import FailureFinding
 from app.models.trace import Trace
 
-# Ensure project root is reachable for examples imports
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-demo_dir = os.path.join(project_root, "examples", "iris_ml_demo")
-if demo_dir not in sys.path:
-    sys.path.insert(0, demo_dir)
-
-from examples.iris_ml_demo.iris_service import IrisMLPipeline
+try:
+    from app.services.iris_service import IrisMLPipeline
+except Exception:
+    try:
+        from examples.iris_ml_demo.iris_service import IrisMLPipeline
+    except Exception:
+        IrisMLPipeline = None
 
 logger = logging.getLogger("agentlens.ml_api")
 router = APIRouter(tags=["ML Playground"])
