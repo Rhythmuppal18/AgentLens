@@ -16,8 +16,16 @@ import type {
   Trace,
 } from '../types';
 
+const getEnvBaseUrl = (): string | undefined => {
+  const metaEnv = (import.meta as any).env;
+  if (metaEnv?.BACKEND_URL) return metaEnv.BACKEND_URL;
+  if (metaEnv?.VITE_API_URL) return metaEnv.VITE_API_URL;
+  if (typeof process !== 'undefined' && process.env?.BACKEND_URL) return process.env.BACKEND_URL;
+  return undefined;
+};
+
 const getHealthUrl = (): string => {
-  const envUrl = (import.meta as any).env?.VITE_API_URL;
+  const envUrl = getEnvBaseUrl();
   if (envUrl) {
     return `${envUrl.replace(/\/+$/, '')}/health`;
   }
@@ -31,7 +39,7 @@ const PRIMARY_HEALTH_URL = getHealthUrl();
 const FALLBACK_HEALTH_URL = '/health';
 
 const getApiBaseUrl = (): string => {
-  const envUrl = (import.meta as any).env?.VITE_API_URL;
+  const envUrl = getEnvBaseUrl();
   if (envUrl) {
     return `${envUrl.replace(/\/+$/, '')}/api/v1`;
   }
@@ -42,7 +50,7 @@ const getApiBaseUrl = (): string => {
 };
 
 const getDirectApiBaseUrl = (): string => {
-  const envUrl = (import.meta as any).env?.VITE_API_URL;
+  const envUrl = getEnvBaseUrl();
   if (envUrl) {
     return `${envUrl.replace(/\/+$/, '')}/api/v1`;
   }
