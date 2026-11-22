@@ -108,7 +108,7 @@ class SpanContext:
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         try:
             self.end_time = datetime.now(timezone.utc)
-            if self.start_time:
+            if self.start_time and self.duration_ms is None:
                 self.duration_ms = max(
                     0, int((self.end_time - self.start_time).total_seconds() * 1000)
                 )
@@ -200,6 +200,14 @@ class SpanContext:
             logger.debug("set_tokens error (suppressed): %s", exc)
         return self
 
+    def set_duration(self, duration_ms: int) -> "SpanContext":
+        """Explicitly sets span duration in milliseconds (useful for external, async, or simulated execution)."""
+        try:
+            self.duration_ms = max(0, int(duration_ms))
+        except Exception as exc:
+            logger.debug("set_duration error (suppressed): %s", exc)
+        return self
+
     def event(self, name: str, data: Optional[dict[str, Any]] = None) -> None:
         """Records a point-in-time milestone event within this span."""
         try:
@@ -286,7 +294,7 @@ class TraceContext:
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         try:
             self.end_time = datetime.now(timezone.utc)
-            if self.start_time:
+            if self.start_time and self.duration_ms is None:
                 self.duration_ms = max(
                     0, int((self.end_time - self.start_time).total_seconds() * 1000)
                 )
@@ -394,4 +402,12 @@ class TraceContext:
             self.total_tokens = prompt_tokens + completion_tokens
         if cost is not None:
             self.estimated_cost_usd = cost
+        return self
+
+    def set_duration(self, duration_ms: int) -> "TraceContext":
+        """Explicitly sets trace duration in milliseconds."""
+        try:
+            self.duration_ms = max(0, int(duration_ms))
+        except Exception as exc:
+            logger.debug("set_duration error (suppressed): %s", exc)
         return self

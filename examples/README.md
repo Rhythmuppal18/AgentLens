@@ -53,3 +53,19 @@ Demonstrates safe payload capture: sensitive tokens (`api_key`, `secret`, `passw
 ```bash
 python examples/04_payload_capture.py
 ```
+
+### 5. `05_real_ai_agent.py` — Real-World AI Agent with Live Tools & LLM
+Demonstrates a production-grade agent executing real external web API lookups (GitHub REST API), mathematical computation tools, and pluggable LLM integrations (Groq, OpenAI, Ollama, or Fallback) with token usage and cost accounting.
+
+```bash
+# Default execution (auto-detects configured LLM provider or runs fallback)
+python examples/05_real_ai_agent.py
+
+# Optional: Run with Groq free tier
+export GROQ_API_KEY="your_groq_api_key"
+python examples/05_real_ai_agent.py
+
+# Optional: Run with OpenAI
+export OPENAI_API_KEY="your_openai_api_key"
+python examples/05_real_ai_agent.py
+```
