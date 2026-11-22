@@ -1,5 +1,0 @@
-class: CreateRoomRequest
-fields:
-  roomName: String
-  creatorName: String
-  deviceId: String

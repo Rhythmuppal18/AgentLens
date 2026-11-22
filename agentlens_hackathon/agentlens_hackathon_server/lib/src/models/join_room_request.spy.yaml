@@ -1,5 +1,0 @@
-class: JoinRoomRequest
-fields:
-  roomCode: String
-  participantName: String
-  deviceId: String

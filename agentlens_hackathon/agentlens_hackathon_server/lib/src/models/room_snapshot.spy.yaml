@@ -1,9 +1,0 @@
-class: RoomSnapshot
-fields:
-  room: DebugRoom
-  lastSequenceNumber: int
-  participants: List<RoomParticipant>
-  traces: List<RoomTrace>
-  spans: List<RoomSpan>
-  findings: List<RoomFinding>
-  notes: List<InvestigationNote>
