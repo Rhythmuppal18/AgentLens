@@ -1,0 +1,4 @@
+exception: RoomException
+fields:
+  message: String
+  statusCode: int

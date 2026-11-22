@@ -69,6 +69,16 @@ class TestAgentLensSDK(unittest.TestCase):
         self.assertEqual(trace.status, "SUCCESS")
         self.assertIsNotNone(trace.duration_ms)
 
+    def test_explicit_set_duration_preserved(self):
+        """Verifies that explicitly calling set_duration overrides the computed duration."""
+        with self.client.trace(agent_name="DurationAgent") as trace:
+            trace.set_duration(9500)
+            with trace.span(name="timed_step", span_type="AGENT_STEP") as span:
+                span.set_duration(12500)
+
+        self.assertEqual(trace.duration_ms, 9500)
+        self.assertEqual(span.duration_ms, 12500)
+
     def test_unhandled_exception_capture(self):
         """Verifies automatic error capture and non-suppression of exceptions."""
         with self.assertRaises(ValueError) as cm:

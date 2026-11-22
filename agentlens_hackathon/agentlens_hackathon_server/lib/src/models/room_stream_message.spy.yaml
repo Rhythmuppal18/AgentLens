@@ -1,0 +1,11 @@
+class: RoomStreamMessage
+fields:
+  sequenceNumber: int
+  eventType: String
+  roomCode: String
+  timestamp: DateTime
+  participant: RoomParticipant?
+  trace: RoomTrace?
+  span: RoomSpan?
+  finding: RoomFinding?
+  note: InvestigationNote?

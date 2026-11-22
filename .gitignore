@@ -67,3 +67,24 @@ htmlcov/
 
 # Local runner shims
 powershell.cmd
+
+# Serverpod & Flutter (agentlens_hackathon)
+**/config/passwords.yaml
+**/config/firebase_service_account_key.json
+**/.serverpod/
+**/.scloud/
+**/.dart_tool/
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/web/app/
+**/.dart_skills/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.flutter-plugins-dependencies
+**/build/
+**/doc/api/
+**/*.db-shm
+**/*.db-wal
+**/*.symbols
+**/*.map.json

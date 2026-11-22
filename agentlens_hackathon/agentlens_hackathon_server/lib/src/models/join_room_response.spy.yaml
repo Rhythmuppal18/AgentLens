@@ -1,0 +1,5 @@
+class: JoinRoomResponse
+fields:
+  room: DebugRoom
+  participant: RoomParticipant
+  participantToken: String

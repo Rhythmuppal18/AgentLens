@@ -1,0 +1,13 @@
+class: TelemetryTraceDto
+fields:
+  roomCode: String
+  ingestToken: String
+  traceId: String
+  agentName: String
+  status: String
+  durationMs: int
+  totalTokens: int, default=0
+  startTime: DateTime
+  endTime: DateTime?
+  isSample: bool, default=false
+  spans: List<TelemetrySpanDto>

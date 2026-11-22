@@ -91,6 +91,14 @@ span.set_tokens(
 )
 ```
 
+### Explicit Duration Control
+
+For asynchronous operations, delegated tasks, or external execution timings, explicitly override measured duration:
+
+```python
+span.set_duration(14500)  # in milliseconds
+```
+
 ### Milestone Events
 
 Point-in-time instantaneous occurrences within a span or trace:

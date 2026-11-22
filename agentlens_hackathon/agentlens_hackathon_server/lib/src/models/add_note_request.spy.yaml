@@ -1,0 +1,6 @@
+class: AddNoteRequest
+fields:
+  roomCode: String
+  participantToken: String
+  findingId: int?
+  content: String

@@ -163,7 +163,7 @@ def main():
             span_type="AGENT_STEP",
             input_payload={"document_pages": 450},
         ) as s_step:
-            s_step._duration_ms = 16500  # SLA is 15000ms
+            s_step.set_duration(16500)  # SLA is 15000ms
 
             with client.span(
                 name="claude_statute_parser",
@@ -171,7 +171,7 @@ def main():
                 input_payload={"prompt": "Extract regulatory non-compliance risks..."},
                 attributes={"model": "claude-3-opus"},
             ) as s_slow_llm:
-                s_slow_llm._duration_ms = 11800  # LLM SLA is 10000ms
+                s_slow_llm.set_duration(11800)  # LLM SLA is 10000ms
                 s_slow_llm.set_output({"clauses_extracted": 34})
 
         t3.set_tokens(prompt_tokens=2800, completion_tokens=400, cost=0.0780)
